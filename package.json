@@ -8,6 +8,7 @@
     "deploy": "vercel"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.43.5",
     "frog": "latest",
     "hono": "^4"
   },
