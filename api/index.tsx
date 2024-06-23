@@ -2,9 +2,14 @@ import { Button, Frog, TextInput } from 'frog'
 import { devtools } from 'frog/dev'
 import { serveStatic } from 'frog/serve-static'
 import { pinata } from 'frog/hubs'
+// import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
 import { neynar } from 'frog/middlewares'
-import { supabase } from '../supabase/supabaseClient.js' // Import Supabase client
+import { Supabase } from '../supabase/supabaseClient.js'
+// Uncomment to use Edge Runtime.
+// export const config = {
+//   runtime: 'edge',
+// }
 
 export const app = new Frog({
   assetsPath: '/',
@@ -17,33 +22,20 @@ export const app = new Frog({
   }),
 )
 
-app.frame('/', async (c) => {
-  const { status, frameData, verified } = c
-  console.log('verified', verified)
-  console.log('frameData', frameData)
+app.frame('/', (c) => {
+  const {status, frameData, verified } = c
+  console.log('verified', verified);
+  console.log('frameData', frameData);
 
   const { fid } = frameData || {}
-  console.log('fid', fid)
+  console.log('fid', fid);
 
   const { displayName, followerCount } = c.var.interactor || {}
-  console.log('displayName', displayName)
-  console.log('followerCount', followerCount)
-
-  // Save response to Supabase
-  if (status === 'response') {
-    try {
-      const { data, error } = await supabase
-        .from('responses')
-        .insert([{ fid, displayName, followerCount, frame: '/', status }])
-
-      if (error) throw error
-      console.log('Supabase insert data:', data)
-    } catch (error) {
-      console.error('Supabase insert error:', error)
-    }
-  }
+  console.log('displayName', displayName);
+  console.log('followerCount', followerCount);
 
   return c.res({
+    // action:'/verified',
     image: (
       <div
         style={{
@@ -81,7 +73,10 @@ app.frame('/', async (c) => {
       </div>
     ),
     intents: [
-      status === 'response' ? <Button> </Button> : <Button>Start</Button>
+      // <TextInput placeholder="Enter custom fruit..." />,
+      status === 'response' ? <Button> </Button> :
+      <Button >Start</Button>
+      // status === 'response' && <Button.Reset>Reset</Button.Reset>,
     ],
   })
 })
@@ -90,22 +85,20 @@ app.frame('/interest', async (c) => {
   const { buttonValue, inputText, status, frameData, verified } = c
   const fruit = inputText || buttonValue
 
-  console.log('verified', verified)
-  console.log('frameData', frameData)
+  console.log('verified', verified);
+  console.log('frameData', frameData);
 
   const { fid } = frameData || {}
-  console.log('fid', fid)
+  console.log('fid', fid);
 
   const { displayName, followerCount } = c.var.interactor || {}
-  console.log('displayName', displayName)
-  console.log('followerCount', followerCount)
-
-  // Save response to Supabase
+  console.log('displayName', displayName);
+  console.log('followerCount', followerCount);
   if (status === 'response') {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await Supabase
         .from('responses')
-        .insert([{ fid, displayName, followerCount, frame: '/interest', fruit, status }])
+        .insert([{ fid, displayName, followerCount, frame: '/', status }])
 
       if (error) throw error
       console.log('Supabase insert data:', data)
@@ -113,7 +106,6 @@ app.frame('/interest', async (c) => {
       console.error('Supabase insert error:', error)
     }
   }
-
   return c.res({
     image: (
       <div
@@ -158,6 +150,7 @@ app.frame('/interest', async (c) => {
     ],
   })
 })
+
 
 // @ts-ignore
 const isEdgeFunction = typeof EdgeFunction !== 'undefined'
