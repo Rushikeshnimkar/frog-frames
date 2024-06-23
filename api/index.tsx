@@ -5,7 +5,7 @@ import { pinata } from 'frog/hubs'
 // import { neynar } from 'frog/hubs'
 import { handle } from 'frog/vercel'
 import { neynar } from 'frog/middlewares'
-import { Supabase } from '../supabase/supabaseClient.js'
+
 // Uncomment to use Edge Runtime.
 // export const config = {
 //   runtime: 'edge',
@@ -81,7 +81,7 @@ app.frame('/', (c) => {
   })
 })
 
-app.frame('/interest', async (c) => {
+app.frame('/interest', (c) => {
   const { buttonValue, inputText, status, frameData, verified } = c
   const fruit = inputText || buttonValue
 
@@ -94,18 +94,7 @@ app.frame('/interest', async (c) => {
   const { displayName, followerCount } = c.var.interactor || {}
   console.log('displayName', displayName);
   console.log('followerCount', followerCount);
-  if (status === 'response') {
-    try {
-      const { data, error } = await Supabase
-        .from('responses')
-        .insert([{ fid, displayName, followerCount, frame: '/', status }])
-
-      if (error) throw error
-      console.log('Supabase insert data:', data)
-    } catch (error) {
-      console.error('Supabase insert error:', error)
-    }
-  }
+  
   return c.res({
     image: (
       <div
